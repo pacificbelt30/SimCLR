@@ -111,14 +111,12 @@ if __name__ == '__main__':
     config = {
         "lr": args.lr,
         "weight_decay": args.weight_decay,
-        "arch": "resnet50",
+        "arch": "resnet34",
         "dataset": args.dataset,
         "epochs": args.epochs,
         "batch_size": args.batch_size,
-        "momentum": args.momentum,
         "temperature": args.temperature,
         "feature_dim": args.feature_dim,
-        "queue_size": args.m
     }
     wandb.init(project=args.wandb_project, name=args.wandb_run, config=config)
 
