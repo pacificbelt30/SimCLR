@@ -1,6 +1,6 @@
 from torchvision import transforms
 from PIL import Image
-from torchvision.datasets as datasets
+import torchvision.datasets as datasets
 import numpy as np
 
 
