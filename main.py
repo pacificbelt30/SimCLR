@@ -121,12 +121,21 @@ if __name__ == '__main__':
     wandb.init(project=args.wandb_project, name=args.wandb_run, config=config)
 
     # data prepare
-    train_data = utils.CIFAR10Pair(root='data', train=True, transform=utils.train_transform, download=True)
+    if args.dataset == 'stl10':
+        train_data = utils.STL10Pair(root='data', split='train+unlabeled', transform=utils.train_transform, download=True)
+        memory_data = utils.STL10Pair(root='data', split='train', transform=utils.test_transform, download=True)
+        test_data = utils.STL10Pair(root='data', split='test', transform=utils.test_transform, download=True)
+    elif args.dataset == 'cifar10':
+        train_data = utils.CIFAR10Pair(root='data', train=True, transform=utils.train_transform, download=True)
+        memory_data = utils.CIFAR10Pair(root='data', train=True, transform=utils.test_transform, download=True)
+        test_data = utils.CIFAR10Pair(root='data', train=False, transform=utils.test_transform, download=True)
+    else:
+        train_data = utils.CIFAR100Pair(root='data', train=True, transform=utils.train_transform, download=True)
+        memory_data = utils.CIFAR100Pair(root='data', train=True, transform=utils.test_transform, download=True)
+        test_data = utils.CIFAR100Pair(root='data', train=False, transform=utils.test_transform, download=True)
     train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=16, pin_memory=True,
-                              drop_last=True)
-    memory_data = utils.CIFAR10Pair(root='data', train=True, transform=utils.test_transform, download=True)
+                                  drop_last=True)
     memory_loader = DataLoader(memory_data, batch_size=batch_size, shuffle=False, num_workers=16, pin_memory=True)
-    test_data = utils.CIFAR10Pair(root='data', train=False, transform=utils.test_transform, download=True)
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, num_workers=16, pin_memory=True)
 
     # model setup and optimizer config
