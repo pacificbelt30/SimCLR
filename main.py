@@ -57,7 +57,10 @@ def test(net, memory_data_loader, test_data_loader):
         # [D, N]
         feature_bank = torch.cat(feature_bank, dim=0).t().contiguous()
         # [N]
-        feature_labels = torch.tensor(memory_data_loader.dataset.targets, device=feature_bank.device)
+        if hasattr(memory_data_loader.dataset, 'labels'):
+            feature_labels = torch.tensor(memory_data_loader.dataset.labels, device=feature_bank.device)
+        else:
+            feature_labels = torch.tensor(memory_data_loader.dataset.targets, device=feature_bank.device)
         # loop test data to predict the label by weighted knn search
         test_bar = tqdm(test_data_loader)
         for data, _, target in test_bar:
