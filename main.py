@@ -73,7 +73,7 @@ def test(net, memory_data_loader, test_data_loader):
             # [B, K]
             sim_weight, sim_indices = sim_matrix.topk(k=k, dim=-1)
             # [B, K]
-            sim_labels = torch.gather(feature_labels.expand(data.size(0), -1), dim=-1, index=sim_indices)
+            sim_labels = torch.gather(feature_labels.expand(data.size(0), -1), dim=-1, index=sim_indices).to(torch.int64)
             sim_weight = (sim_weight / temperature).exp()
 
             # counts for each class
