@@ -99,6 +99,8 @@ if __name__ == '__main__':
     parser.add_argument('--k', default=200, type=int, help='Top k most similar images used to predict the label')
     parser.add_argument('--batch_size', default=512, type=int, help='Number of images in each mini-batch')
     parser.add_argument('--epochs', default=500, type=int, help='Number of sweeps over the dataset to train')
+    parser.add_argument('--save_intermediate', action='store_true', help='Save intermediate (epochs/2) model if True')
+    parser.add_argument('--per_epochs', default=100, type=int, help='Number of models to be saved every what epoch')
     parser.add_argument('--lr', default=1e-3, type=float, help='Learning Rate at the training start')
     parser.add_argument('--weight_decay', default=1e-6, type=float, help='Weight Decay')
     parser.add_argument('--dataset', default='stl10', type=str, help='Training Dataset (e.g. CIFAR10, STL10)')
@@ -125,9 +127,9 @@ if __name__ == '__main__':
 
     # data prepare
     if args.dataset == 'stl10':
-        train_data = utils.STL10Pair(root='data', split='train+unlabeled', transform=utils.train_transform, download=True)
-        memory_data = utils.STL10Pair(root='data', split='train', transform=utils.test_transform, download=True)
-        test_data = utils.STL10Pair(root='data', split='test', transform=utils.test_transform, download=True)
+        train_data = utils.STL10Pair(root='data', split='unlabeled', transform=utils.stl_train_transform, download=True)
+        memory_data = utils.STL10Pair(root='data', split='train', transform=utils.stl_test_transform, download=True)
+        test_data = utils.STL10Pair(root='data', split='test', transform=utils.stl_test_transform, download=True)
     elif args.dataset == 'cifar10':
         train_data = utils.CIFAR10Pair(root='data', train=True, transform=utils.train_transform, download=True)
         memory_data = utils.CIFAR10Pair(root='data', train=True, transform=utils.test_transform, download=True)
@@ -169,6 +171,10 @@ if __name__ == '__main__':
         if test_acc_1 > best_acc:
             best_acc = test_acc_1
             torch.save(model.state_dict(), 'results/{}_model.pth'.format(save_name_pre))
+        if (epoch%args.per_epochs) == 0 and args.save_intermediate:
+            save_name_intermediate = '{}_{}_{}_{}_{}_{}_{}'.format(feature_dim, m, temperature, momentum, k, batch_size, epoch)
+            torch.save(model_q.state_dict(), 'results/{}_model.pth'.format(save_name_intermediate))
+            wandb.save('results/{}_model.pth'.format(save_name_intermediate))
 
     wandb.save('results/{}_model.pth'.format(save_name_pre))
     wandb.finish()

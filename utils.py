@@ -74,3 +74,22 @@ test_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize([0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010])])
 
+stl_train_transform = transforms.Compose([
+    transforms.Resize(32),
+    transforms.RandomResizedCrop(32),
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.RandomApply([transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
+    transforms.RandomGrayscale(p=0.2),
+    transforms.ToTensor(),
+    transforms.Normalize([0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010])])
+
+stl_test_transform = transforms.Compose([
+    transforms.Resize(32),
+    transforms.ToTensor(),
+    transforms.Normalize([0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010])])
+
+available_dataset = {
+    'cifar10': CIFAR10Pair,
+    'cifar100': CIFAR100Pair,
+    'stl10': STL10Pair
+}
