@@ -148,7 +148,7 @@ if __name__ == '__main__':
     flops, params = profile(model, inputs=(torch.randn(1, 3, 32, 32).cuda(),))
     flops, params = clever_format([flops, params])
     print('# Model Params: {} FLOPs: {}'.format(params, flops))
-    optimizer = optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-6)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     c = len(memory_data.classes)
 
     # training loop
@@ -172,7 +172,7 @@ if __name__ == '__main__':
             best_acc = test_acc_1
             torch.save(model.state_dict(), 'results/{}_model.pth'.format(save_name_pre))
         if (epoch%args.per_epochs) == 0 and args.save_intermediate:
-            save_name_intermediate = '{}_{}_{}_{}_{}_{}_{}'.format(feature_dim, m, temperature, momentum, k, batch_size, epoch)
+            save_name_intermediate = '{}_{}_{}_{}_{}'.format(feature_dim, temperature, k, batch_size, epoch)
             torch.save(model_q.state_dict(), 'results/{}_model.pth'.format(save_name_intermediate))
             wandb.save('results/{}_model.pth'.format(save_name_intermediate))
 
