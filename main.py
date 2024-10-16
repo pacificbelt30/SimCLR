@@ -173,8 +173,9 @@ if __name__ == '__main__':
             torch.save(model.state_dict(), 'results/{}_model.pth'.format(save_name_pre))
         if (epoch%args.per_epochs) == 0 and args.save_intermediate:
             save_name_intermediate = '{}_{}_{}_{}_{}'.format(feature_dim, temperature, k, batch_size, epoch)
-            torch.save(model_q.state_dict(), 'results/{}_model.pth'.format(save_name_intermediate))
+            torch.save(model.state_dict(), 'results/{}_model.pth'.format(save_name_intermediate))
             wandb.save('results/{}_model.pth'.format(save_name_intermediate))
 
     wandb.save('results/{}_model.pth'.format(save_name_pre))
+    wandb.save('results/{}_statistics.csv'.format(save_name_pre))
     wandb.finish()
