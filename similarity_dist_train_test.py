@@ -206,6 +206,8 @@ if __name__ == '__main__':
     memory_loader = DataLoader(memory_data, batch_size=batch_size, shuffle=shuffle, num_workers=8, pin_memory=True)
     test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=shuffle, num_workers=8, pin_memory=True)
 
+    if not os.path.exists('results'):
+        os.mkdir('results')
     # model setup and optimizer config
     if args.wandb_model_runpath != '':
         import os
