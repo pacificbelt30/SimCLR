@@ -25,7 +25,6 @@ def sim(model, memory_data_loader, test_data_loader, num_of_samples:int=500, enc
     total_top1, total_top5, total_num, feature_bank = 0.0, 0.0, 0, []
     test_feature_bank, train_feature_bank = [], []
     test_var, train_var = [], []
-    idx_09 = []
     counter = 0
     with torch.no_grad():
         # generate feature bank
@@ -76,10 +75,6 @@ def sim(model, memory_data_loader, test_data_loader, num_of_samples:int=500, enc
             for i in range(1,len(cos_list)):
                 result += cos_list[i]
             result /= len(cos_list)
-
-            for i in range(len(result)):
-                if result[i] >= 0.94:
-                    idx_09.append(i+counter)
 
             train_feature_bank.append(result)
             counter += len(result)
@@ -141,8 +136,8 @@ def sim(model, memory_data_loader, test_data_loader, num_of_samples:int=500, enc
     ks_result_var = kstest(data[0], data[1], alternative='two-sided', method='auto')
     # plt.title(f'{num_of_samples}_{ks_result.pvalue}')
     plt.title(f'train & test Varriance distribution, {num_of_samples} samples')
-    plt.hist(data[0], 30, alpha=0.6, density=False, label=olabels[0], stacked=False, range=(0.4, 1.0), color=color[0])
-    plt.hist(data[1], 30, alpha=0.6, density=False, label=olabels[1], stacked=False, range=(0.4, 1.0), color=color[1])
+    plt.hist(data[0], 30, alpha=0.6, density=False, label=olabels[0], stacked=False, range=(0.0, 0.1), color=color[0])
+    plt.hist(data[1], 30, alpha=0.6, density=False, label=olabels[1], stacked=False, range=(0.0, 0.1), color=color[1])
     plt.legend()
     plt.ylabel('The number of samples')
     plt.xlabel('Variance')
