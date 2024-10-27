@@ -27,8 +27,6 @@ def sim(model, memory_data_loader, test_data_loader, num_of_samples:int=500, enc
     test_var, train_var = [], []
     idx_09 = []
     counter = 0
-    test_counter = 0
-    total_correct_1, test_total_correct_1 = 0, 0
     with torch.no_grad():
         # generate feature bank
         for x, target in tqdm(memory_data_loader, desc='Feature extracting'):
@@ -116,10 +114,10 @@ def sim(model, memory_data_loader, test_data_loader, num_of_samples:int=500, enc
             counter += len(result)
 
         # [D, N]
-        test_feature_bank = torch.cat(test_feature_bank, dim=0).contiguous()
         train_feature_bank = torch.cat(train_feature_bank, dim=0).contiguous()
+        test_feature_bank = torch.cat(test_feature_bank, dim=0).contiguous()
         train_var = torch.cat(train_var, dim=0)
-        print('Accuracy model dataset:', total_correct_1/counter)
+        test_var = torch.cat(test_var, dim=0)
 
     color = ['tab:blue', 'tab:orange', 'tab:green']
 
@@ -139,6 +137,18 @@ def sim(model, memory_data_loader, test_data_loader, num_of_samples:int=500, enc
     plt.savefig(f"results/sim_test_train_model.png")
     plt.close()
 
+    data = [train_var[:num_of_samples].to('cpu').detach().numpy().copy(),test_var[:num_of_samples].to('cpu').detach().numpy().copy()]
+    ks_result_var = kstest(data[0], data[1], alternative='two-sided', method='auto')
+    # plt.title(f'{num_of_samples}_{ks_result.pvalue}')
+    plt.title(f'train & test Varriance distribution, {num_of_samples} samples')
+    plt.hist(data[0], 30, alpha=0.6, density=False, label=olabels[0], stacked=False, range=(0.4, 1.0), color=color[0])
+    plt.hist(data[1], 30, alpha=0.6, density=False, label=olabels[1], stacked=False, range=(0.4, 1.0), color=color[1])
+    plt.legend()
+    plt.ylabel('The number of samples')
+    plt.xlabel('Variance')
+    plt.savefig(f"results/var_test_train_model.png")
+    plt.close()
+
     data = [train_feature_bank.to('cpu').detach().numpy().copy(),test_feature_bank.to('cpu').detach().numpy().copy()]
     ks_result_all = kstest(train_feature_bank.to('cpu').detach().numpy().copy(),test_feature_bank.to('cpu').detach().numpy().copy(), alternative='two-sided', method='auto')
     # plt.title(f'all_{ks_result_all.pvalue}')
@@ -151,7 +161,7 @@ def sim(model, memory_data_loader, test_data_loader, num_of_samples:int=500, enc
     plt.savefig("results/sim_test_train_model_all.png")
     plt.close()
 
-    return ks_result.pvalue, ks_result.statistic
+    return ks_result.pvalue, ks_result.statistic, ks_result_var.pvalue, ks_result_var.statistic
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train MoCo')
@@ -235,16 +245,17 @@ if __name__ == '__main__':
         model = Classifier(args.classes).cuda()
         model.load_state_dict(torch.load(model_path), strict=False)
 
-    pvalue, statistic = sim(model, memory_loader, test_loader, num_of_samples=args.num_of_samples, encoder_flag=args.is_encoder, device=device)
+    pvalue, statistic, var_pvalue, var_statistic = sim(model, memory_loader, test_loader, num_of_samples=args.num_of_samples, encoder_flag=args.is_encoder, device=device)
     # sim(model_q, memory_loader, memory_loader)
 
     # save kstest result
-    wandb.log({'pvalue': pvalue, 'statistic': statistic})
+    wandb.log({'pvalue': pvalue, 'statistic': statistic, 'var_pvalue': var_pvalue, 'var_statistic': var_statistic})
 
     # wandb finish
     os.remove(os.path.join(wandb.run.dir, args.model_path))
     wandb.save("results/seed_check.png")
     wandb.save("results/sim_test_train_model.png")
+    wandb.save("results/var_test_train_model.png")
     wandb.save("results/sim_test_train_model_all.png")
     wandb.finish()
 
