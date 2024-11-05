@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torchvision
 from torchvision.models import vgg11, mobilenet_v2, mobilenet_v3_large
 from torchvision.models.resnet import resnet34
 from typing import Optional
@@ -69,12 +70,28 @@ class TwoLayerClassifier(nn.Module):
         return out
 
 
+def create_mobilenet_v2(num_classes: int=10):
+    # Reference https://yul.hatenablog.com/entry/2018/08/27/162423
+    config = [
+        # t, c, n, s
+        [1, 16, 1, 1],
+        [6, 24, 2, 1],
+        [6, 32, 3, 2],
+        [6, 64, 4, 2],
+        [6, 96, 3, 1],
+        [6, 160, 3, 2],
+        [6, 320, 1, 1],
+    ]
+    model_instance = mobilenet_v2(num_classes=num_classes, inverted_residual_setting=config)
+    model_instance.features[0] = torchvision.ops.Conv2dNormActivation(3, 32, kernel_size=3, stride=1, padding=1, bias=False)
+    return model_instance
+
 def StudentModel(num_classes: int=10, model: str='mobilenet_v2'):
     if model == 'mobilenet_v3':
         return mobilenet_v3_large(num_classes=num_classes)
     elif model == 'mobilenet_v2':
-        return mobilenet_v2(num_classes=num_classes)
+        return create_mobilenet_v2(num_classes)
     elif model == 'vgg':
         return vgg11(num_classes=num_classes)
     else:
-        return mobilenet_v2(num_classes=num_classes)
+        return create_mobilenet_v2(num_classes)
